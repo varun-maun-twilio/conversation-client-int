@@ -23,7 +23,7 @@ function fetchName(participant: ReduxParticipant): string {
   let name: string = participant.identity ?? "unknown";
   if (participant.attributes != null) {
     const friendlyName: string | null =
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // eslint-disable-next-line
       // @ts-ignore
       participant.attributes["friendlyName"];
     if (friendlyName != null) {

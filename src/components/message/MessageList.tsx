@@ -312,7 +312,7 @@ const MessageList: React.FC<MessageListProps> = (props: MessageListProps) => {
                 <ChatBubble>
                   {wrappedBody}
                   <MessageMedia
-                    key={message.sid}
+                    key={`${message.sid}.messagemedia`}
                     attachments={conversationAttachments?.[message.sid]}
                     onDownload={async () =>
                       await onDownloadAttachments(message)

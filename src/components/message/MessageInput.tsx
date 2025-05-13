@@ -2,6 +2,8 @@ import { Box } from "@twilio-paste/core";
 import { ChatComposer } from "@twilio-paste/core/chat-composer";
 import {
   $getRoot,
+  $createParagraphNode,
+  $createTextNode,
   ClearEditorPlugin,
   CLEAR_EDITOR_COMMAND,
   COMMAND_PRIORITY_LOW,
@@ -61,6 +63,14 @@ const MessagePropPlugin = (props: MessagePropPluginProps) => {
     if (message === undefined || message === null || message.length === 0) {
       editor.dispatchCommand(CLEAR_EDITOR_COMMAND, undefined);
     }
+    else{
+      try{
+      const root = $getRoot();
+      root.append(
+        $createParagraphNode().append(
+          $createTextNode(message)));
+        }catch(e){}
+    }
   }, [editor, message]);
 
   return null;
@@ -73,6 +83,12 @@ const MessageInput: React.FC<MessageInputProps> = (
 
   const local = useSelector((state: AppState) => state.local);
   const convoPlaceholder = getTranslation(local, "convoPlaceholder");
+
+  useEffect(() => {
+    console.error(message+"From Custom Input");
+    
+  }, [message]);
+
 
   return (
     <Box>

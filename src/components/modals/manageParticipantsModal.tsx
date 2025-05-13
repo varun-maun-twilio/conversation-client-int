@@ -124,7 +124,7 @@ const ManageParticipantsModal: React.FC<ManageParticipantsModalProps> = (
                             size="sizeIcon80"
                             name={
                               (user.identity ||
-                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                // eslint-disable-next-line 
                                 // @ts-ignore
                                 user.attributes["friendlyName"]) ??
                               "unknown"
@@ -135,7 +135,7 @@ const ManageParticipantsModal: React.FC<ManageParticipantsModalProps> = (
                           <Text as="span" textAlign="left">
                             {user.type == "chat"
                               ? user.identity
-                              : // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                              : // eslint-disable-next-line 
                                 // @ts-ignore
                                 (user.attributes["friendlyName"] as string) ??
                                 "unknown"}

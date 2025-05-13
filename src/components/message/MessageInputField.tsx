@@ -1,10 +1,11 @@
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { bindActionCreators } from "redux";
-
+import { Menu, MenuButton, MenuGroup, useMenuState } from '@twilio-paste/core/menu';
 import { Client } from "@twilio/conversations";
+import { ChatIcon } from "@twilio-paste/icons/esm/ChatIcon";
 import { AttachIcon } from "@twilio-paste/icons/esm/AttachIcon";
-import { Box, Button } from "@twilio-paste/core";
+import { Box, Button, Input } from "@twilio-paste/core";
 import { useTheme } from "@twilio-paste/theme";
 import { Text } from "@twilio-paste/text";
 
@@ -16,6 +17,7 @@ import SendMessageButton from "./SendMessageButton";
 import { ReduxConversation } from "../../store/reducers/convoReducer";
 import { getSdkConversationObject } from "../../conversations-objects";
 import { ReduxMessage } from "../../store/reducers/messageListReducer";
+import {default as CategorySubMenu} from "./CategorySubMenu"
 
 interface SendMessageProps {
   convoSid: string;
@@ -24,6 +26,20 @@ interface SendMessageProps {
   convo: ReduxConversation;
   typingData: string[];
   droppedFiles: File[];
+}
+
+interface CannedResponse {
+  label: string;
+  text: string;
+}
+
+interface ResponseCategory {
+  section: string;
+  responses: CannedResponse[];
+}
+
+interface CannedResponseCategories {
+  categories: ResponseCategory[];
 }
 
 const MessageInputField: React.FC<SendMessageProps> = (
@@ -40,11 +56,55 @@ const MessageInputField: React.FC<SendMessageProps> = (
   const dispatch = useDispatch();
   const { addNotifications } = bindActionCreators(actionCreators, dispatch);
 
+  const [responseCategories, setResponseCategories] = useState<undefined | CannedResponseCategories>(undefined);
+
+  const menu = useMenuState({
+    placement: 'top-start',
+    wrap: 'horizontal',
+    modal: true,
+  });
+
+
+  useEffect(() => {
+  //Do nothing
+  }, [message]);
+
   useEffect(() => {
     setMessage("");
     setFiles([]);
     setFilesInputKey(Date.now().toString());
   }, [props.convo]);
+
+  useEffect(() => {
+    async function getResponses() {
+      try {
+        const responses = {data:{
+          categories:[
+            {
+              section:"Greeting",
+              responses:[
+                {
+                  label:"Hello",
+                  text:"Hello"
+                },
+                {
+                  label:"Hi",
+                  text:"HiXS"
+                },
+              ]
+            }
+          ]
+        }};
+        //await CannedResponsesService.fetchCannedResponses();
+        setResponseCategories(responses.data);
+      
+      } catch (e) {
+       
+      }
+    }
+
+    getResponses();
+  }, []);
 
   useEffect(() => {
     if (!files.length) {
@@ -96,6 +156,12 @@ const MessageInputField: React.FC<SendMessageProps> = (
     setFiles(existentFiles);
   };
 
+  const onMenuClicked = async (menuTemplate:string)=> {
+      const conversationAttributes =  sdkConvo.attributes;
+      console.error({conversationAttributes});
+      setMessage(message+""+menuTemplate);
+  }
+
   const onMessageSend = async () => {
     if (message.length == 0 && files.length == 0) {
       return;
@@ -103,6 +169,7 @@ const MessageInputField: React.FC<SendMessageProps> = (
 
     const { convo } = props;
     const sdkConvo = getSdkConversationObject(convo);
+    
 
     const newMessageBuilder = sdkConvo.prepareMessage().setBody(message);
 
@@ -122,7 +189,7 @@ const MessageInputField: React.FC<SendMessageProps> = (
       const fileData = new FormData();
       fileData.set(file.name, file, file.name);
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // eslint-disable-next-line 
       // @ts-ignore
       // newMessage.attachedMedia.push({
       //   sid: key + "",
@@ -133,7 +200,7 @@ const MessageInputField: React.FC<SendMessageProps> = (
       // addAttachment(convo.sid, "-1", key + "", file);
       newMessageBuilder.addMedia(fileData);
     }
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // eslint-disable-next-line 
     // @ts-ignore
     // upsertMessages(convo.sid, [newMessage]);
     setMessage("");
@@ -182,6 +249,29 @@ const MessageInputField: React.FC<SendMessageProps> = (
         <Box
           paddingBottom="space30"
           paddingLeft="space50"
+          paddingRight="space50"
+          paddingTop="space20"
+          display="flex"
+          flexDirection="column"
+          justifyContent="flex-start"
+          alignItems="start"
+        >
+           <MenuButton {...menu} variant="reset"  element="CANNED_RESPONSES_MENU_BUTTON">
+            <ChatIcon decorative title="Canned Responses" />
+          </MenuButton>
+          <Menu {...menu} aria-label="canned-responses">
+            <MenuGroup label="Canned Responses Menu" element="CANNED_RESPONSES_MENU">
+              {responseCategories?.categories.map((category: ResponseCategory) => (
+                <CategorySubMenu category={category} menu={menu} message={message} onMenuClicked={(msg:string)=>onMenuClicked(msg)}  key={category.section} />
+              ))}
+            </MenuGroup>
+          </Menu>
+          </Box>
+
+          {/** 
+          <Box
+          paddingBottom="space30"
+          paddingLeft="space50"
           paddingRight="space10"
           paddingTop="space20"
           display="flex"
@@ -206,19 +296,27 @@ const MessageInputField: React.FC<SendMessageProps> = (
             />
           </Button>
         </Box>
+        */}
         <Box paddingRight="space50" flexGrow={10}>
-          <MessageInput
+          <Input type="text" value={message} onChange={(e)=>{
+                  sdkConvo.typing();
+                  setMessage(e.target.value);
+          }}
+  
+          
+          />
+         {/*  <MessageInput
             assets={files}
             message={message}
             onChange={(e: string) => {
-              sdkConvo.typing();
-              setMessage(e);
+             
             }}
             onEnterKeyPress={async () => {
               await onMessageSend();
             }}
             onFileRemove={onFileRemove}
           />
+          */}
         </Box>
         <Box
           display="flex"

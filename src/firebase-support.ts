@@ -12,7 +12,7 @@ let messaging: Messaging;
 let initialized = false;
 
 try {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line 
   app = initializeApp((window as any).firebaseConfig);
   messaging = getMessaging(app);
   initialized = true;
@@ -70,7 +70,7 @@ export const showNotification = (pushNotification: PushNotification): void => {
   }
 
   // TODO: remove when new version of sdk will be released
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // eslint-disable-next-line 
   // @ts-ignore
   const notificationTitle = pushNotification.data.conversationTitle || "";
 
